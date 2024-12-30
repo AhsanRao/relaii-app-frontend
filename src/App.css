@@ -1,13 +1,26 @@
+/* 
+  #root container:
+  - keeps a max-width for large screens
+  - centers the content horizontally with margin: 0 auto
+  - uses padding for spacing
+  - removed forced text-align: center for small-screen flexibility
+    (you can re-add if you strictly want all text centered)
+*/
 #root {
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
-  text-align: center;
+  /* text-align: center; */ /* Optional: remove or uncomment if you want all text centered */
 }
 
+/* 
+  .logo adjustments:
+  - height changed to use a relative unit for responsiveness
+  - added a responsive media query to shrink logo on smaller devices
+*/
 .logo {
-  height: 6em;
-  padding: 1.5em;
+  height: 6rem;
+  padding: 1.5rem;
   will-change: filter;
   transition: filter 300ms;
 }
@@ -18,6 +31,9 @@
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
 
+/* 
+  Keyframes for spinning logo
+*/
 @keyframes logo-spin {
   from {
     transform: rotate(0deg);
@@ -27,16 +43,49 @@
   }
 }
 
+/* 
+  Animates the second link's logo if user has no motion preferences
+*/
 @media (prefers-reduced-motion: no-preference) {
   a:nth-of-type(2) .logo {
     animation: logo-spin infinite 20s linear;
   }
 }
 
+/* 
+  .card styling:
+  - added border / background-color to help it stand out (optional)
+  - you can tweak these to your liking
+*/
 .card {
-  padding: 2em;
+  padding: 2rem;
+  margin: 1rem auto;
+  max-width: 600px;
+  background-color: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
+/* 
+  .read-the-docs:
+  - Light gray text
+*/
 .read-the-docs {
   color: #888;
+}
+
+/* 
+  Responsive media queries:
+  - Example: reduce logo size on smaller screens
+*/
+@media (max-width: 768px) {
+  .logo {
+    height: 4rem;
+    padding: 1rem;
+  }
+
+  .card {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
 }

@@ -1,70 +1,92 @@
-// src/components/ChatBox.jsx
-import { motion } from 'framer-motion'
-import { useRef, useEffect } from 'react'
+import React, { useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
 
-const ChatBox = ({ messages }) => {
-  const messagesEndRef = useRef(null)
+const ChatBox = ({ messages, selectedOption }) => {
+  const messagesEndRef = useRef(null);
+  const chatContainerRef = useRef(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   useEffect(() => {
-    scrollToBottom()
-  }, [messages])
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = 0;
+    }
+  }, [messages]);
+
+  const getRelationshipTitle = (option) => {
+    const titles = {
+      'significant-other': 'Partner',
+      'friend': 'Friend',
+      'family': 'Family Member',
+      'colleague': 'Colleague'
+    };
+    return titles[option] || option;
+  };
+
+  const messageVariants = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -20 }
+  };
 
   return (
-    <motion.div 
-      className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-4 md:p-6 border border-indigo-100 h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-indigo-200 scrollbar-track-transparent"
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      <div className="space-y-4">
+    <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl flex flex-col h-[calc(100vh-12rem)]">
+      {/* Chat Header */}
+      <div className="border-b border-gray-200 p-4 md:p-6">
+        <h3 className="text-lg font-semibold text-gray-800">
+          Conversation with {getRelationshipTitle(selectedOption)}
+        </h3>
+        <p className="text-sm text-gray-500">Messages are private and anonymous</p>
+      </div>
+
+      {/* Messages */}
+      <div 
+        ref={chatContainerRef}
+        className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent"
+      >
         {messages.map((message, index) => (
-          <motion.div
-            key={index}
-            initial={{ 
-              opacity: 0, 
-              x: message.role === 'user' ? 40 : -40,
-              y: 20,
-              scale: 0.9
-            }}
-            animate={{ 
-              opacity: 1, 
-              x: 0, 
-              y: 0,
-              scale: 1
-            }}
-            transition={{ 
-              duration: 0.5,
-              delay: index * 0.3,
-              ease: [0.23, 1, 0.32, 1] // Custom easing for smooth animation
-            }}
-            className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
-            <motion.div
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              transition={{
-                duration: 0.2,
-                delay: index * 0.3 + 0.3,
-                ease: "easeOut"
-              }}
-              className={`max-w-[85%] p-3 md:p-4 rounded-2xl ${
-                message.role === 'user'
-                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-br-none shadow-lg'
-                  : 'bg-white text-gray-800 rounded-bl-none shadow-md'
-              } text-base md:text-lg transform-gpu`}
-            >
-              {message.content}
-            </motion.div>
-          </motion.div>
-        ))}
+  <motion.div
+    key={index}
+    variants={messageVariants}
+    initial="initial"
+    animate="animate"
+    exit="exit"
+    transition={{ 
+      duration: 0.5, 
+      delay: index * 0.5,
+      ease: "easeOut" 
+    }}
+    className={`flex ${message.role === 'relaii' ? 'justify-start' : 'justify-end'}`}
+  >
+    <div className="relative max-w-[80%] pl-3">
+      {message.role === 'relaii' && (
+        <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-indigo-600 flex items-center justify-center">
+          <span className="text-[10px] font-bold text-white">R</span>
+        </div>
+      )}
+      <div
+        className={`p-3 rounded-2xl ${
+          message.role === 'relaii'
+            ? 'bg-gray-100 text-gray-800 rounded-tl-sm'
+            : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-tr-sm'
+        }`}
+      >
+        <p className="text-[15px] leading-relaxed">{message.content}</p>
+      </div>
+    </div>
+  </motion.div>
+))}
         <div ref={messagesEndRef} />
       </div>
-    </motion.div>
-  )
-}
 
-export default ChatBox
+      {/* Footer */}
+      <div className="border-t border-gray-200 p-4 text-sm text-gray-500 text-center">
+        Messages are end-to-end encrypted
+      </div>
+    </div>
+  );
+};
+
+export default ChatBox;

@@ -1,82 +1,153 @@
-// src/App.jsx
-import { useState } from 'react'
-import TypeEffect from './components/TypeEffect'
-import ChatBox from './components/ChatBox'
-import { motion, AnimatePresence } from 'framer-motion'
-
-const staticText = "Tell your partner what you're really thinking - "
-
-const dynamicPrompts = [
-  "without saying a word.",
-  "and let them understand.",
-  "when words feel heavy.",
-  "and bridge the silence.",
-  "through expression.",
-  "with complete honesty.",
-  "and see what happens.",
-  "in your own unique way.",
-  "when timing isn't right.",
-  "before it's too late."
-]
-
-// Shuffle array function for random prompts
-const shuffleArray = (array) => {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-}
-
-// Get randomized prompts on component mount
-const randomizedPrompts = shuffleArray([...dynamicPrompts])
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronDown, X } from "lucide-react";
+import StatementCarousel from "./components/StatementCarousel";
+import ChatBox from "./components/ChatBox";
+import ClosingPage from "./components/ClosingPage";
 
 function App() {
-  const [message, setMessage] = useState('')
-  const [selectedOption, setSelectedOption] = useState('significant-other')
-  const [showChat, setShowChat] = useState(false)
-  const [messages, setMessages] = useState([])
-  const [showModal, setShowModal] = useState(false)
+  const [message, setMessage] = useState("");
+  const [selectedOption, setSelectedOption] = useState("significant-other");
+  const [showChat, setShowChat] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [showThankYou, setShowThankYou] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showMoreInfo, setShowMoreInfo] = useState(false);
+
+  // Form data for Join modal
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: ''
-  })
+    name: "",
+    email: "",
+    phone: "",
+  });
 
-  const handleSubmit = () => {
+  const relationshipOptions = [
+    { value: "significant-other", label: "Significant Other" },
+    { value: "friend", label: "Friend" },
+    { value: "mom", label: "Mom" },
+    { value: "dad", label: "Dad" },
+    { value: "sibling", label: "Sibling" },
+    { value: "boss", label: "Boss" },
+    { value: "coworker", label: "Coworker" },
+  ];
+
+  // Submit user message => mock some chat responses
+  const handleSubmit = async () => {
     if (!message.trim()) return;
-    
-    const mockResponse = [
-      { role: 'user', content: message },
-      { role: 'assistant', content: "I appreciate you sharing that with me. What made you decide to open up about this now?" },
-      { role: 'user', content: "I've been keeping this to myself for a while..." },
-      { role: 'assistant', content: "That must have been difficult. How do you feel now that you've shared it?" },
-      { role: 'user', content: "It's actually quite relieving to finally say it." },
-      { role: 'assistant', content: "I'm glad you felt comfortable enough to share. Would you like to talk more about it?" },
-      { role: 'user', content: "Yes, I think I would..." },
-      { role: 'assistant', content: "Take your time. I'm here to listen without judgment." }
-    ]
-    
-    setMessages(mockResponse)
-    setShowChat(true)
-    setMessage('')
-  }
 
-  const handleJoinSubmit = (e) => {
-    e.preventDefault()
-    console.log('Form submitted:', formData)
-    setShowModal(false)
-    setFormData({ name: '', email: '', phone: '' })
-  }
+    const mockResponse = [
+      { role: "assistant", content: "Hey, how's your day going?" },
+      { role: "user", content: "It's been okay, just busy with work." },
+      {
+        role: "assistant",
+        content:
+          "That makes sense. Sometimes when we're busy, it's hard to express what's really on our mind. Have you been feeling that way?",
+      },
+      { role: "user", content: "Yeah, I guess I have..." },
+      {
+        role: "assistant",
+        content:
+          "It's natural. Often the things we want to say get buried under daily stress. What would you want them to know if you could share freely?",
+      },
+      {
+        role: "user",
+        content: "I just wish I could tell them how I really feel...",
+      },
+      {
+        role: "assistant",
+        content:
+          "Those feelings are valid. Maybe start with small moments of honesty - they often lead to deeper understanding.",
+      },
+      { role: "user", content: "You're right. I should try that." },
+      {
+        role: "assistant",
+        content: "Take your time. The right words will come when you're ready.",
+      },
+    ];
+
+    try {
+      setIsLoading(true);
+    setMessages([]);
+      const response = await fetch('http://127.0.0.1:8000/api/chat/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: message,
+          subject: selectedOption
+        })
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to generate chat');
+      }
+
+      setIsLoading(false);
+  
+      const data = await response.json();
+      setMessages(data.messages);
+      setShowChat(true);
+      setMessage('');
+    } catch (error) {
+      console.error('Error generating chat:', error);
+      setIsLoading(false);
+    } 
+  };
+
+  // "Join" modal form submit
+  const handleJoinSubmit = async (e) => {
+    e.preventDefault();
+    
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/users/join', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to join');
+      }
+  
+      setShowModal(false);
+      setShowThankYou(true);
+      setFormData({ name: "", email: "", phone: "" });
+  
+      // Hide thank you message after 5 seconds
+      setTimeout(() => {
+        setShowThankYou(false);
+      }, 5000);
+    } catch (error) {
+      console.error('Error joining:', error);
+    }
+  };
+
+  // Auto-scroll to chat when it appears
+  useEffect(() => {
+    if (showChat) {
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [showChat]);
 
   return (
     <div className="min-h-screen w-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 overflow-x-hidden">
+      {/* Header */}
       <header className="fixed top-0 w-full bg-white/80 backdrop-blur-sm z-50 shadow-sm">
         <nav className="w-full max-w-[2000px] mx-auto px-4 md:px-8 py-4 flex justify-between items-center">
-          <div className="text-3xl md:text-4xl font-bold italic bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">
+          <div
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            className="text-3xl md:text-4xl font-bold italic bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text cursor-pointer"
+          >
             Relaii
           </div>
-          <button 
+          <button
             onClick={() => setShowModal(true)}
             className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 md:px-8 py-2 md:py-2.5 rounded-full hover:opacity-90 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
           >
@@ -85,30 +156,51 @@ function App() {
         </nav>
       </header>
 
-      <main className="w-full min-h-screen pt-20 flex items-center justify-center">
-        <div className="w-full max-w-[2000px] h-full px-4 md:px-8 flex flex-col lg:flex-row items-center justify-center gap-8">
+      {/* Thank You Notification */}
+      <AnimatePresence>
+        {showThankYou && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="w-full lg:w-1/2 flex flex-col justify-center py-8"
+            initial={{ opacity: 0, y: -100 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -100 }}
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-white rounded-xl shadow-xl p-4 flex items-center gap-3"
           >
+            <div className="text-green-600 font-medium">
+              Thanks for joining! Check your email for next steps.
+            </div>
+            <button
+              onClick={() => setShowThankYou(false)}
+              className="p-1 hover:bg-gray-100 rounded-full"
+            >
+              <X className="w-4 h-4 text-gray-500" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Main Content */}
+      <main className="w-full min-h-screen pt-[80px]">
+        {/* Landing Section */}
+        <div className="w-full max-w-[2000px] mx-auto px-4 md:px-8 flex flex-col lg:flex-row items-center justify-center gap-8">
+          {/* Left Side: Carousel + Form */}
+          <div className="w-auto  flex flex-col justify-center py-8">
             <div className="max-w-2xl mx-auto lg:mx-0">
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
-                className="mb-24 h-32"
+                className="pt-8 h-[250px]"
               >
-                <TypeEffect staticText={staticText} dynamicTexts={randomizedPrompts} />
+                <StatementCarousel />
               </motion.div>
-              
-              <motion.p 
+
+              <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                className="text-lg md:text-xl text-gray-700 leading-relaxed mb-12"
+                className="text-lg md:text-xl text-gray-700 leading-relaxed mb-8"
               >
-                Say what's on your mind and hear what's on theirs - anonymously,
+                Say what's on your mind and hear what's on theirs—anonymously,
                 thoughtfully, and effortlessly.
               </motion.p>
 
@@ -125,65 +217,150 @@ function App() {
                   className="w-full p-4 md:p-6 bg-white/70 backdrop-blur-sm border-2 border-indigo-100 rounded-xl min-h-[120px] resize-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300 text-gray-700 text-lg shadow-lg placeholder-gray-400"
                 />
 
-                <select
-                  value={selectedOption}
-                  onChange={(e) => setSelectedOption(e.target.value)}
-                  className="w-full p-3 md:p-4 bg-white/70 backdrop-blur-sm border-2 border-indigo-100 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300 text-gray-700 text-lg shadow-lg"
-                >
-                  <option value="significant-other">Significant Other</option>
-                  <option value="friend">Friend</option>
-                  <option value="family">Family Member</option>
-                  <option value="colleague">Colleague</option>
-                </select>
+                <div className="relative">
+                  <select
+                    value={selectedOption}
+                    onChange={(e) => setSelectedOption(e.target.value)}
+                    className="w-full p-3 md:p-4 bg-white/70 backdrop-blur-sm border-2 border-indigo-100 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300 text-gray-700 text-lg shadow-lg appearance-none pr-12"
+                  >
+                    {relationshipOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <ChevronDown className="w-5 h-5 text-gray-500" />
+                  </div>
+                </div>
 
                 <button
-                  onClick={handleSubmit}
-                  disabled={!message.trim()}
-                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-4 md:py-5 rounded-xl hover:opacity-90 transition-all duration-300 shadow-lg hover:shadow-xl text-xl font-medium transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none"
-                >
-                  Relaii it!
-                </button>
+  onClick={handleSubmit}
+  disabled={!message.trim() || isLoading}
+  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-4 md:py-5 rounded-xl hover:opacity-90 transition-all duration-300 shadow-lg hover:shadow-xl text-xl font-medium transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden"
+>
+  {isLoading ? (
+    <div className="flex items-center justify-center gap-2">
+      <div className="w-2 h-2 bg-white rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+      <div className="w-2 h-2 bg-white rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+      <div className="w-2 h-2 bg-white rounded-full animate-bounce"></div>
+      <span className="ml-2">Relaiing</span>
+    </div>
+  ) : (
+    'Relaii it!'
+  )}
+</button>
               </motion.div>
             </div>
-          </motion.div>
+          </div>
 
-          <AnimatePresence mode="wait">
+          {/* Right Side: Chat Section */}
+          <AnimatePresence>
             {showChat && (
               <motion.div
-                initial={{ opacity: 0, x: '100%' }}
+                initial={{ opacity: 0, x: "100%" }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: '100%' }}
-                transition={{ type: 'spring', damping: 25, stiffness: 120 }}
+                exit={{ opacity: 0, x: "100%" }}
+                transition={{ type: "spring", damping: 25, stiffness: 120 }}
                 className="w-full lg:w-1/2 flex items-center justify-center py-8"
               >
                 <div className="w-full max-w-xl">
-                  <ChatBox messages={messages} />
+                  <ChatBox
+                    messages={messages}
+                    selectedOption={selectedOption}
+                  />
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 2 }}
+                    className="mt-6 text-center"
+                  >
+                    <button
+                      onClick={() => {
+                        // Instead of navigating away, just show more info below
+                        setShowMoreInfo(true);
+                        // Scroll to the new section after a short delay
+                      //   setTimeout(() => {
+                      //     window.scrollTo({
+                      //       top: document.documentElement.scrollHeight,
+                      //       behavior: "smooth",
+                      //     });
+                      //   }, 300);
+                      // }}
+
+                      const scrollToBottom = () => {
+                        const target = document.documentElement.scrollHeight;
+                        const currentPosition = window.scrollY;
+                        const distance = target - currentPosition;
+                        const step = distance / 100; // Divide into smaller steps for smooth effect
+                        let progress = 0;
+                  
+                        const slowScroll = () => {
+                          if (progress < 100) {
+                            window.scrollBy(0, step);
+                            progress++;
+                            requestAnimationFrame(slowScroll);
+                          }
+                        };
+                  
+                        requestAnimationFrame(slowScroll);
+                      };
+                      setTimeout(scrollToBottom, 300);
+  }}
+                      className="inline-block px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full hover:opacity-90 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                    >
+                      Learn more about how Relaii works →
+                    </button>
+                  </motion.div>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
+        </div>
 
-          {/* Join Modal */}
+        {/* Additional Info Section (ClosingPage) */}
+        <AnimatePresence>
+          {showMoreInfo && (
+            <motion.div
+              key="closing"
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 40 }}
+              transition={{ duration: 0.5 }}
+              className="mt-8 px-4 md:px-8 max-w-[2000px] mx-auto"
+            >
+              <ClosingPage onJoinClick={() => setShowModal(true)} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </main>
+
+      {/* Modal Section */}
       <AnimatePresence>
         {showModal && (
-          <>
+          <div className="fixed inset-0 flex items-center justify-center z-50">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowModal(false)}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="fixed -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-md mx-auto bg-white rounded-2xl shadow-xl z-50 p-6 md:p-8"
+              className="relative w-[90%] max-w-md bg-white rounded-2xl shadow-xl z-50 p-6 md:p-8 mx-auto"
             >
-              <h2 className="text-2xl font-bold mb-6 bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">Join Relaii</h2>
+              <h2 className="text-2xl font-bold mb-6 bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">
+                Join Relaii
+              </h2>
               <form onSubmit={handleJoinSubmit} className="space-y-4">
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-indigo-600 mb-1">
+                  <label
+                    htmlFor="name"
+                    className="block text-sm font-medium text-indigo-600 mb-1"
+                  >
                     Name *
                   </label>
                   <input
@@ -191,13 +368,18 @@ function App() {
                     id="name"
                     required
                     value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
                     className="w-full p-3 bg-gray-50/50 border-2 border-indigo-100 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300 text-gray-600 placeholder:text-gray-400"
                     placeholder="Enter your name"
                   />
                 </div>
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-indigo-600 mb-1">
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium text-indigo-600 mb-1"
+                  >
                     Email *
                   </label>
                   <input
@@ -205,20 +387,27 @@ function App() {
                     id="email"
                     required
                     value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
                     className="w-full p-3 bg-gray-50/50 border-2 border-indigo-100 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300 text-gray-600 placeholder:text-gray-400"
                     placeholder="Enter your email"
                   />
                 </div>
                 <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-indigo-600 mb-1">
+                  <label
+                    htmlFor="phone"
+                    className="block text-sm font-medium text-indigo-600 mb-1"
+                  >
                     Phone Number (Optional)
                   </label>
                   <input
                     type="tel"
                     id="phone"
                     value={formData.phone}
-                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phone: e.target.value })
+                    }
                     className="w-full p-3 bg-gray-50/50 border-2 border-indigo-100 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300 text-gray-600 placeholder:text-gray-400"
                     placeholder="Enter your phone number"
                   />
@@ -240,14 +429,11 @@ function App() {
                 </div>
               </form>
             </motion.div>
-          </>
+          </div>
         )}
       </AnimatePresence>
-          
-        </div>
-      </main>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
