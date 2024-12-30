@@ -15,6 +15,8 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [showMoreInfo, setShowMoreInfo] = useState(false);
 
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+
   // Form data for Join modal
   const [formData, setFormData] = useState({
     name: "",
@@ -68,61 +70,61 @@ function App() {
 
     try {
       setIsLoading(true);
-    setMessages([]);
-      const response = await fetch('http://127.0.0.1:8000/api/chat/generate', {
-        method: 'POST',
+      setMessages([]);
+      const response = await fetch(`${apiBaseUrl}/chat/generate`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           message: message,
-          subject: selectedOption
-        })
+          subject: selectedOption,
+        }),
       });
-  
+
       if (!response.ok) {
-        throw new Error('Failed to generate chat');
+        throw new Error("Failed to generate chat");
       }
 
       setIsLoading(false);
-  
+
       const data = await response.json();
       setMessages(data.messages);
       setShowChat(true);
-      setMessage('');
+      setMessage("");
     } catch (error) {
-      console.error('Error generating chat:', error);
+      console.error("Error generating chat:", error);
       setIsLoading(false);
-    } 
+    }
   };
 
   // "Join" modal form submit
   const handleJoinSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/users/join', {
-        method: 'POST',
+      const response = await fetch(`${apiBaseUrl}/users/join`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
       });
-  
+
       if (!response.ok) {
-        throw new Error('Failed to join');
+        throw new Error("Failed to join");
       }
-  
+
       setShowModal(false);
       setShowThankYou(true);
       setFormData({ name: "", email: "", phone: "" });
-  
+
       // Hide thank you message after 5 seconds
       setTimeout(() => {
         setShowThankYou(false);
       }, 5000);
     } catch (error) {
-      console.error('Error joining:', error);
+      console.error("Error joining:", error);
     }
   };
 
@@ -235,21 +237,21 @@ function App() {
                 </div>
 
                 <button
-  onClick={handleSubmit}
-  disabled={!message.trim() || isLoading}
-  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-4 md:py-5 rounded-xl hover:opacity-90 transition-all duration-300 shadow-lg hover:shadow-xl text-xl font-medium transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden"
->
-  {isLoading ? (
-    <div className="flex items-center justify-center gap-2">
-      <div className="w-2 h-2 bg-white rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-      <div className="w-2 h-2 bg-white rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-      <div className="w-2 h-2 bg-white rounded-full animate-bounce"></div>
-      <span className="ml-2">Relaiing</span>
-    </div>
-  ) : (
-    'Relaii it!'
-  )}
-</button>
+                  onClick={handleSubmit}
+                  disabled={!message.trim() || isLoading}
+                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-4 md:py-5 rounded-xl hover:opacity-90 transition-all duration-300 shadow-lg hover:shadow-xl text-xl font-medium transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden"
+                >
+                  {isLoading ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-2 h-2 bg-white rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                      <div className="w-2 h-2 bg-white rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                      <div className="w-2 h-2 bg-white rounded-full animate-bounce"></div>
+                      <span className="ml-2">Relaiing</span>
+                    </div>
+                  ) : (
+                    "Relaii it!"
+                  )}
+                </button>
               </motion.div>
             </div>
           </div>
@@ -280,33 +282,33 @@ function App() {
                         // Instead of navigating away, just show more info below
                         setShowMoreInfo(true);
                         // Scroll to the new section after a short delay
-                      //   setTimeout(() => {
-                      //     window.scrollTo({
-                      //       top: document.documentElement.scrollHeight,
-                      //       behavior: "smooth",
-                      //     });
-                      //   }, 300);
-                      // }}
+                        //   setTimeout(() => {
+                        //     window.scrollTo({
+                        //       top: document.documentElement.scrollHeight,
+                        //       behavior: "smooth",
+                        //     });
+                        //   }, 300);
+                        // }}
 
-                      const scrollToBottom = () => {
-                        const target = document.documentElement.scrollHeight;
-                        const currentPosition = window.scrollY;
-                        const distance = target - currentPosition;
-                        const step = distance / 100; // Divide into smaller steps for smooth effect
-                        let progress = 0;
-                  
-                        const slowScroll = () => {
-                          if (progress < 100) {
-                            window.scrollBy(0, step);
-                            progress++;
-                            requestAnimationFrame(slowScroll);
-                          }
+                        const scrollToBottom = () => {
+                          const target = document.documentElement.scrollHeight;
+                          const currentPosition = window.scrollY;
+                          const distance = target - currentPosition;
+                          const step = distance / 100; // Divide into smaller steps for smooth effect
+                          let progress = 0;
+
+                          const slowScroll = () => {
+                            if (progress < 100) {
+                              window.scrollBy(0, step);
+                              progress++;
+                              requestAnimationFrame(slowScroll);
+                            }
+                          };
+
+                          requestAnimationFrame(slowScroll);
                         };
-                  
-                        requestAnimationFrame(slowScroll);
-                      };
-                      setTimeout(scrollToBottom, 300);
-  }}
+                        setTimeout(scrollToBottom, 300);
+                      }}
                       className="inline-block px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full hover:opacity-90 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                     >
                       Learn more about how Relaii works →
