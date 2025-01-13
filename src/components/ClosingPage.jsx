@@ -4,7 +4,7 @@ import { Shield, Sliders, MessageCircle } from 'lucide-react';
 
 const ClosingPage = ({ onJoinClick }) => {
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+    <div className="min-h-screen w-full bg-transparent from-indigo-50 via-white to-purple-50">
       <main className="w-full max-w-[2000px] mx-auto px-4 md:px-8 py-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

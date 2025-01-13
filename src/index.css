@@ -1,3 +1,9 @@
+@font-face {
+  font-family: 'RelaiiLogoFont';
+  src: url('./assets/fonts/NexaBold.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,9 +12,12 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
+  color-scheme: light;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  --background-image: url('/src/assets/crunch.jpg'); /* Path to image */
+  --background-size: cover; /* Ensures the image covers the entire screen */
+  --background-position: center; /* Centers the image */
+  --background-repeat: no-repeat; 
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;

@@ -4,6 +4,7 @@ import { ChevronDown, X } from "lucide-react";
 import StatementCarousel from "./components/StatementCarousel";
 import ChatBox from "./components/ChatBox";
 import ClosingPage from "./components/ClosingPage";
+import { Instagram } from "lucide-react";
 
 function App() {
   const [message, setMessage] = useState("");
@@ -14,6 +15,7 @@ function App() {
   const [showThankYou, setShowThankYou] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showMoreInfo, setShowMoreInfo] = useState(false);
+  const [showFloatingButton, setShowFloatingButton] = useState(false);
 
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
@@ -131,21 +133,43 @@ function App() {
   // Auto-scroll to chat when it appears
   useEffect(() => {
     if (showChat) {
-      window.scrollTo({
-        top: document.documentElement.scrollHeight,
-        behavior: "smooth",
-      });
+      setShowMoreInfo(true);
+      // setShowFloatingButton(true);
     }
   }, [showChat]);
+  useEffect(() => {
+    const handleScroll = () => {
+      const closingSection = document.getElementById("closing-section");
+      if (closingSection) {
+        const rect = closingSection.getBoundingClientRect();
+        if (rect.top <= window.innerHeight && rect.bottom >= 0) {
+          setShowFloatingButton(true);
+        }
+      }
+    };
+  
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <div className="min-h-screen w-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 overflow-x-hidden">
-      {/* Header */}
+    // <div className="min-h-screen w-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 overflow-x-hidden background-image">
+    <div
+      className="min-h-screen w-screen overflow-x-hidden overlay-container"
+      style={{
+        backgroundImage: 'var(--background-image)',
+        backgroundSize: 'var(--background-size)',
+        backgroundPosition: 'var(--background-position)',
+        backgroundRepeat: 'var(--background-repeat)',
+        position: 'relative',
+      }}
+    > 
+    {/* Header */}
       <header className="fixed top-0 w-full bg-white/80 backdrop-blur-sm z-50 shadow-sm">
         <nav className="w-full max-w-[2000px] mx-auto px-4 md:px-8 py-4 flex justify-between items-center">
           <div
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="text-3xl md:text-4xl font-bold italic bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text cursor-pointer"
+            className="text-4xl md:text-5xl font-bold italic bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text cursor-pointer font-relaii"
           >
             Relaii
           </div>
@@ -200,10 +224,11 @@ function App() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                className="text-lg md:text-xl text-gray-700 leading-relaxed mb-8"
-              >
-                Say what's on your mind and hear what's on theirs—anonymously,
-                thoughtfully, and effortlessly.
+                className="text-lg md:text-xl text-gray-700 leading-relaxed mb-8 text-center"
+                >
+                {/* Say what's on your mind and hear what's on theirs—anonymously,
+                thoughtfully, and effortlessly. */}
+                We use AI to have the conversations you wish you could, for you.
               </motion.p>
 
               <motion.div
@@ -219,20 +244,25 @@ function App() {
                   className="w-full p-4 md:p-6 bg-white/70 backdrop-blur-sm border-2 border-indigo-100 rounded-xl min-h-[120px] resize-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300 text-gray-700 text-lg shadow-lg placeholder-gray-400"
                 />
 
-                <div className="relative">
-                  <select
-                    value={selectedOption}
-                    onChange={(e) => setSelectedOption(e.target.value)}
-                    className="w-full p-3 md:p-4 bg-white/70 backdrop-blur-sm border-2 border-indigo-100 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300 text-gray-700 text-lg shadow-lg appearance-none pr-12"
-                  >
-                    {relationshipOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <ChevronDown className="w-5 h-5 text-gray-500" />
+                <div className="flex items-center space-x-4">
+                  <label className="text-gray-700 text-lg font-medium">
+                    To who:{" "}
+                  </label>
+                  <div className="relative flex-1">
+                    <select
+                      value={selectedOption}
+                      onChange={(e) => setSelectedOption(e.target.value)}
+                      className="w-full p-3 md:p-4 bg-white/70 backdrop-blur-sm border-2 border-indigo-100 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300 text-gray-700 text-lg shadow-lg appearance-none pr-12"
+                    >
+                      {relationshipOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                      <ChevronDown className="w-5 h-5 text-gray-500" />
+                    </div>
                   </div>
                 </div>
 
@@ -279,35 +309,16 @@ function App() {
                   >
                     <button
                       onClick={() => {
-                        // Instead of navigating away, just show more info below
                         setShowMoreInfo(true);
-                        // Scroll to the new section after a short delay
-                        //   setTimeout(() => {
-                        //     window.scrollTo({
-                        //       top: document.documentElement.scrollHeight,
-                        //       behavior: "smooth",
-                        //     });
-                        //   }, 300);
-                        // }}
-
-                        const scrollToBottom = () => {
-                          const target = document.documentElement.scrollHeight;
-                          const currentPosition = window.scrollY;
-                          const distance = target - currentPosition;
-                          const step = distance / 100; // Divide into smaller steps for smooth effect
-                          let progress = 0;
-
-                          const slowScroll = () => {
-                            if (progress < 100) {
-                              window.scrollBy(0, step);
-                              progress++;
-                              requestAnimationFrame(slowScroll);
-                            }
-                          };
-
-                          requestAnimationFrame(slowScroll);
-                        };
-                        setTimeout(scrollToBottom, 300);
+                        setTimeout(() => {
+                          const closingSection =
+                            document.getElementById("closing-section");
+                          if (closingSection) {
+                            closingSection.scrollIntoView({
+                              behavior: "smooth",
+                            });
+                          }
+                        }, 300);
                       }}
                       className="inline-block px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full hover:opacity-90 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                     >
@@ -320,11 +331,25 @@ function App() {
           </AnimatePresence>
         </div>
 
+        {/* Floating Instagram Icon */}
+        {showFloatingButton && (
+          <a
+            href="https://www.instagram.com/relaii_it/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="fixed bottom-6 right-6 z-50 p-3 bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
+            id="closing-section"
+          >
+            <Instagram className="w-6 h-6 text-pink-600" /> {/* Instagram icon */}
+          </a>
+        )}
+
         {/* Additional Info Section (ClosingPage) */}
         <AnimatePresence>
           {showMoreInfo && (
             <motion.div
               key="closing"
+              id="closing-section"
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 40 }}
@@ -354,9 +379,12 @@ function App() {
               exit={{ opacity: 0, scale: 0.95 }}
               className="relative w-[90%] max-w-md bg-white rounded-2xl shadow-xl z-50 p-6 md:p-8 mx-auto"
             >
-              <h2 className="text-2xl font-bold mb-6 bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">
+              <div className="text-4xl md:text-5xl pb-2 font-bold italic bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text cursor-pointer text-center font-relaii">
+                Relaii
+              </div>
+              {/* <h2 className="text-2xl font-bold mb-6 bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">
                 Join Relaii
-              </h2>
+              </h2> */}
               <form onSubmit={handleJoinSubmit} className="space-y-4">
                 <div>
                   <label
@@ -426,7 +454,7 @@ function App() {
                     type="submit"
                     className="flex-1 py-3 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:opacity-90 transition-all duration-300 font-medium"
                   >
-                    Submit
+                    Join
                   </button>
                 </div>
               </form>
