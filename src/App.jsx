@@ -302,30 +302,7 @@ function App() {
                     messages={messages}
                     selectedOption={selectedOption}
                   />
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 2 }}
-                    className="mt-6 text-center"
-                  >
-                    <button
-                      onClick={() => {
-                        setShowMoreInfo(true);
-                        setTimeout(() => {
-                          const closingSection =
-                            document.getElementById("closing-section");
-                          if (closingSection) {
-                            closingSection.scrollIntoView({
-                              behavior: "smooth",
-                            });
-                          }
-                        }, 300);
-                      }}
-                      className="inline-block px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full hover:opacity-90 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                    >
-                      Learn more about how Relaii works →
-                    </button>
-                  </motion.div>
+                  
                 </div>
               </motion.div>
             )}

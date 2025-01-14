@@ -144,7 +144,7 @@ const ChatBox = ({ messages, selectedOption }) => {
   };
 
   return (
-    <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl flex flex-col h-[calc(100vh-12rem)]">
+    <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl flex flex-col h-[calc(100vh-10rem)]">
       {/* Chat Header */}
       <div className="border-b border-gray-200 p-4 md:p-6">
         <h3 className="text-lg font-semibold text-gray-800">
