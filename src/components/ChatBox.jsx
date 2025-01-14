@@ -116,7 +116,8 @@ const ChatBox = ({ messages, selectedOption }) => {
       'dad': 'Dad',
       'sibling': 'Sibling',
       'boss': 'Boss',
-      'coworker': 'Coworker'
+      'coworker': 'Coworker',
+      'teacher': 'Teacher'
     };
     return titles[option] || option;
   };
@@ -130,7 +131,8 @@ const ChatBox = ({ messages, selectedOption }) => {
       'dad': 'D',
       'sibling': 'S',
       'boss': 'B',
-      'coworker': 'C'
+      'coworker': 'C',
+      'teacher': 'T',
     };
     return icons[role] || role.charAt(0).toUpperCase();
   };

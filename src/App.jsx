@@ -14,7 +14,7 @@ function App() {
   const [showModal, setShowModal] = useState(false);
   const [showThankYou, setShowThankYou] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [showMoreInfo, setShowMoreInfo] = useState(false);
+  const [showMoreInfo, setShowMoreInfo] = useState(true);
   const [showFloatingButton, setShowFloatingButton] = useState(false);
 
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
@@ -34,6 +34,7 @@ function App() {
     { value: "sibling", label: "Sibling" },
     { value: "boss", label: "Boss" },
     { value: "coworker", label: "Coworker" },
+    { value: "teacher", label: "Teacher" },
   ];
 
   // Submit user message => mock some chat responses
